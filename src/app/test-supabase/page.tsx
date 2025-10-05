@@ -5,6 +5,8 @@ import { useState } from 'react';
 export default function TestSupabasePage() {
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [schemaResult, setSchemaResult] = useState<string>('');
+  const [schemaLoading, setSchemaLoading] = useState(false);
 
   const testConnection = async () => {
     setLoading(true);
@@ -25,6 +27,32 @@ export default function TestSupabasePage() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkSchema = async () => {
+    setSchemaLoading(true);
+    setSchemaResult('');
+
+    try {
+      const response = await fetch('/api/check-schema');
+      const data = await response.json();
+
+      if (data.success) {
+        setSchemaResult(
+          `✅ ${data.message}\nProfiles: ${data.profilesCount || 'N/A'}\nBookings: ${data.bookingsCount || 'N/A'}`
+        );
+      } else {
+        setSchemaResult(
+          `❌ ${data.message}\nDetails: ${data.error || data.profilesError || data.bookingsError || 'Unknown error'}`
+        );
+      }
+    } catch (error) {
+      setSchemaResult(
+        `❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    } finally {
+      setSchemaLoading(false);
     }
   };
 
@@ -51,18 +79,35 @@ export default function TestSupabasePage() {
           </div>
         </div>
 
-        <button
-          onClick={testConnection}
-          disabled={loading}
-          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium"
-        >
-          {loading ? 'Testing...' : 'Test Supabase Connection'}
-        </button>
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={testConnection}
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium"
+          >
+            {loading ? 'Testing...' : 'Test Supabase Connection'}
+          </button>
+
+          <button
+            onClick={checkSchema}
+            disabled={schemaLoading}
+            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium"
+          >
+            {schemaLoading ? 'Checking...' : 'Check Database Schema'}
+          </button>
+        </div>
 
         {result && (
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold mb-2">Test Result:</h3>
+            <h3 className="font-semibold mb-2">Connection Test Result:</h3>
             <pre className="whitespace-pre-wrap text-sm">{result}</pre>
+          </div>
+        )}
+
+        {schemaResult && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-semibold mb-2">Schema Check Result:</h3>
+            <pre className="whitespace-pre-wrap text-sm">{schemaResult}</pre>
           </div>
         )}
 
@@ -77,8 +122,13 @@ export default function TestSupabasePage() {
             <li>
               Add your Supabase URL and anon key from the Supabase dashboard
             </li>
+            <li>Go to Supabase Dashboard → SQL Editor</li>
+            <li>
+              Copy and paste the contents of <code>database-schema.sql</code>
+            </li>
+            <li>Run the SQL to create the tables</li>
             <li>Restart the development server</li>
-            <li>Click the test button above</li>
+            <li>Click the test buttons above</li>
           </ol>
         </div>
       </div>
