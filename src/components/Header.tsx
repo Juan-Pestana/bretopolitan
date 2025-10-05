@@ -9,7 +9,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
+    // Redirect is handled in the auth context
   };
 
   if (loading) {

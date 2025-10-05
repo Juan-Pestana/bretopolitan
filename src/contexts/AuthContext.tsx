@@ -52,6 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
         setError(null);
+        // Wait a moment for the session to be cleared, then redirect
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
       }
     } catch {
       setError('Failed to logout');
