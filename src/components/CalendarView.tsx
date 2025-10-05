@@ -26,12 +26,14 @@ interface CalendarViewProps {
   events?: CalendarEvent[];
   onSelectSlot?: (slotInfo: { start: Date; end: Date; slots: Date[] }) => void;
   onSelectEvent?: (event: CalendarEvent) => void;
+  userRole?: 'neighbor' | 'trainer' | 'admin';
 }
 
 export default function CalendarView({
   events = [],
   onSelectSlot,
   onSelectEvent,
+  userRole = 'neighbor',
 }: CalendarViewProps) {
   // Custom event style function for color coding
   const eventStyleGetter = (event: CalendarEvent) => {
@@ -90,12 +92,32 @@ export default function CalendarView({
     return {};
   };
 
-  // Handle slot selection
+  // Calculate date restrictions based on user role
+  const today = moment().startOf('day');
+  const maxDate =
+    userRole === 'neighbor'
+      ? today.clone().add(7, 'days').endOf('day') // 7 days for neighbors
+      : today.clone().add(365, 'days').endOf('day'); // 1 year for trainers/admins
+
+  // Handle slot selection with date validation
   const handleSelectSlot = (slotInfo: {
     start: Date;
     end: Date;
     slots: Date[];
   }) => {
+    const slotDate = moment(slotInfo.start);
+
+    // Check if slot is within allowed date range
+    if (userRole === 'neighbor' && slotDate.isAfter(maxDate)) {
+      alert('You can only book gym slots up to 7 days in advance.');
+      return;
+    }
+
+    if (slotDate.isBefore(today)) {
+      alert('You cannot book slots in the past.');
+      return;
+    }
+
     if (onSelectSlot) {
       onSelectSlot(slotInfo);
     }
@@ -140,8 +162,6 @@ export default function CalendarView({
           view={Views.WEEK}
           step={30} // 30-minute intervals
           timeslots={2} // 2 slots per hour (30 minutes each)
-          min={new Date(2024, 0, 1, 6, 0)} // 6:00 AM
-          max={new Date(2024, 0, 1, 22, 0)} // 10:00 PM
           selectable
           onSelectSlot={handleSelectSlot}
           onSelectEvent={handleSelectEvent}
@@ -149,35 +169,51 @@ export default function CalendarView({
           slotPropGetter={slotStyleGetter}
           style={{ height: '100%' }}
           className="rbc-calendar"
+          // Date restrictions
+          min={today.toDate()}
+          max={maxDate.toDate()}
           // Customize the appearance
           components={{
-            toolbar: (props) => (
-              <div className="flex justify-between items-center mb-4 p-4 bg-white border-b">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {moment(props.date).format('MMMM YYYY')}
-                </h2>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => props.onNavigate('PREV')}
-                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => props.onNavigate('TODAY')}
-                    className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
-                  >
-                    Today
-                  </button>
-                  <button
-                    onClick={() => props.onNavigate('NEXT')}
-                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
-                  >
-                    Next
-                  </button>
+            toolbar: (props) => {
+              const currentDate = moment(props.date);
+              const canNavigateNext =
+                userRole === 'neighbor'
+                  ? currentDate.clone().add(1, 'week').isBefore(maxDate)
+                  : true; // Trainers/admins can navigate freely
+
+              return (
+                <div className="flex justify-between items-center mb-4 p-4 bg-white border-b">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {currentDate.format('MMMM YYYY')}
+                  </h2>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => props.onNavigate('PREV')}
+                      className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => props.onNavigate('TODAY')}
+                      className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={() => props.onNavigate('NEXT')}
+                      disabled={!canNavigateNext}
+                      className={`px-3 py-1 text-sm rounded text-gray-700 ${
+                        canNavigateNext
+                          ? 'bg-gray-100 hover:bg-gray-200'
+                          : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ),
+              );
+            },
           }}
         />
       </div>

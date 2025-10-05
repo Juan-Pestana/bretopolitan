@@ -201,6 +201,7 @@ export default function DashboardPage() {
             events={events}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
+            userRole={user.role}
           />
         </div>
       </div>
