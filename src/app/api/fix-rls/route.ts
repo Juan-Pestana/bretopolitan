@@ -5,7 +5,7 @@ export async function POST() {
   try {
     // Read the fixed RLS policies SQL
     const fixedPoliciesSQL = `
--- Drop existing policies first
+-- Drop ALL existing policies first
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
@@ -19,6 +19,10 @@ DROP POLICY IF EXISTS "Users can update own bookings" ON bookings;
 DROP POLICY IF EXISTS "Users can delete own bookings" ON bookings;
 DROP POLICY IF EXISTS "Admins can manage all bookings" ON bookings;
 DROP POLICY IF EXISTS "Trainers can delete own bookings" ON bookings;
+
+-- Drop any other policies that might exist
+DROP POLICY IF EXISTS "Users can manage own bookings" ON bookings;
+DROP POLICY IF EXISTS "Everyone can view bookings" ON bookings;
 
 -- Enable RLS on all tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
