@@ -191,9 +191,13 @@ export default function CalendarView({
           slotPropGetter={slotStyleGetter}
           style={{ height: '100%' }}
           className="rbc-calendar"
+          // Time-of-day window (6:00 AM to 10:00 PM)
+          min={moment().startOf('day').hour(6).toDate()}
+          max={moment().startOf('day').hour(22).toDate()}
+          // Default scroll target to 6:00 AM
+          scrollToTime={moment().startOf('day').hour(6).toDate()}
           // Date restrictions
-          min={today.toDate()}
-          max={maxDate.toDate()}
+          // NOTE: date range is enforced in selection handler and toolbar; not via min/max props
           // Customize the appearance
           components={{
             toolbar: (props) => {
