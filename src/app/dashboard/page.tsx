@@ -2,11 +2,71 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import CalendarView, { CalendarEvent } from '@/components/CalendarView';
+import moment from 'moment';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+  // Generate sample events for demonstration
+  useEffect(() => {
+    if (user) {
+      const sampleEvents: CalendarEvent[] = [
+        // Sample own booking
+        {
+          id: '1',
+          title: 'My Workout',
+          start: moment().add(1, 'day').hour(9).minute(0).toDate(),
+          end: moment().add(1, 'day').hour(10).minute(0).toDate(),
+          resource: {
+            type: 'own-booking',
+            userId: user.id,
+          },
+        },
+        // Sample booking by others
+        {
+          id: '2',
+          title: 'Booked by Others',
+          start: moment().add(2, 'day').hour(14).minute(0).toDate(),
+          end: moment().add(2, 'day').hour(15).minute(30).toDate(),
+          resource: {
+            type: 'booked-by-others',
+          },
+        },
+        // Sample trainer slot
+        {
+          id: '3',
+          title: 'Trainer Session',
+          start: moment().add(3, 'day').hour(18).minute(0).toDate(),
+          end: moment().add(3, 'day').hour(19).minute(0).toDate(),
+          resource: {
+            type: 'trainer-slot',
+            trainerId: 'trainer-1',
+          },
+        },
+      ];
+      setEvents(sampleEvents);
+    }
+  }, [user]);
+
+  // Handle slot selection
+  const handleSelectSlot = (slotInfo: {
+    start: Date;
+    end: Date;
+    slots: Date[];
+  }) => {
+    console.log('Selected slot:', slotInfo);
+    // TODO: Open booking modal
+  };
+
+  // Handle event selection
+  const handleSelectEvent = (event: CalendarEvent) => {
+    console.log('Selected event:', event);
+    // TODO: Show event details or allow editing
+  };
 
   // Redirect to login if no user is authenticated
   useEffect(() => {
@@ -126,21 +186,20 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="mt-8 bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Quick Actions
-          </h3>
-          <div className="flex flex-wrap gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-              Book Gym Session
-            </button>
-            <button className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-              View Calendar
-            </button>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-              My Bookings
-            </button>
-          </div>
+        {/* Calendar Section */}
+        <div className="mt-8 bg-white shadow overflow-hidden rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Gym Booking Calendar
+          </h2>
+          <p className="text-gray-700 mb-4">
+            View available gym slots and book your sessions. Click on available
+            slots to make a booking.
+          </p>
+          <CalendarView
+            events={events}
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+          />
         </div>
       </div>
     </div>
