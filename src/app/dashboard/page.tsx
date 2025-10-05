@@ -111,6 +111,24 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        {/* Calendar Section - Moved to top */}
+        <div className="mb-8 bg-white shadow overflow-hidden rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Gym Booking Calendar
+          </h2>
+          <p className="text-gray-700 mb-4">
+            View available gym slots and book your sessions. Click on available
+            slots to make a booking.
+          </p>
+          <CalendarView
+            events={events}
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            userRole={user.role}
+          />
+        </div>
+
+        {/* Quick Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -186,23 +204,6 @@ export default function DashboardPage() {
               </button>
             </div>
           )}
-        </div>
-
-        {/* Calendar Section */}
-        <div className="mt-8 bg-white shadow overflow-hidden rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Gym Booking Calendar
-          </h2>
-          <p className="text-gray-700 mb-4">
-            View available gym slots and book your sessions. Click on available
-            slots to make a booking.
-          </p>
-          <CalendarView
-            events={events}
-            onSelectSlot={handleSelectSlot}
-            onSelectEvent={handleSelectEvent}
-            userRole={user.role}
-          />
         </div>
       </div>
     </div>
