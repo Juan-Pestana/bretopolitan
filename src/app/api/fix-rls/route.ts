@@ -24,7 +24,7 @@ DROP POLICY IF EXISTS "Trainers can delete own bookings" ON bookings;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
--- Simple policies that work without recursion
+-- Simple policies that work without recursion or auth.jwt() issues
 CREATE POLICY "Users can view own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
@@ -35,12 +35,11 @@ CREATE POLICY "Users can update own profile" ON profiles
 CREATE POLICY "Users can insert own profile" ON profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
--- For now, allow all operations on bookings (we'll handle admin/trainer logic in the app)
+-- Bookings policies
 CREATE POLICY "Users can manage own bookings" ON bookings
   FOR ALL USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- Allow everyone to view bookings for availability
 CREATE POLICY "Everyone can view bookings" ON bookings
   FOR SELECT USING (true);
 `;
