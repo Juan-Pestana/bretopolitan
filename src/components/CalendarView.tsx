@@ -2,6 +2,7 @@
 
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
 import moment from 'moment';
+import { useState, useEffect } from 'react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Set moment locale
@@ -35,6 +36,26 @@ export default function CalendarView({
   onSelectEvent,
   userRole = 'neighbor',
 }: CalendarViewProps) {
+  const [currentView, setCurrentView] = useState<Views>(Views.WEEK);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect screen size and set appropriate view
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      setIsMobile(mobile);
+      setCurrentView(mobile ? Views.DAY : Views.WEEK);
+    };
+
+    // Check on mount
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   // Custom event style function for color coding
   const eventStyleGetter = (event: CalendarEvent) => {
     const eventType = event.resource?.type || 'available';
@@ -152,14 +173,15 @@ export default function CalendarView({
         </div>
       </div>
 
-      <div className="h-[600px] w-full">
+      <div className={`w-full ${isMobile ? 'h-[500px]' : 'h-[600px]'}`}>
         <Calendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
-          views={[Views.WEEK]}
-          view={Views.WEEK}
+          views={[Views.DAY, Views.WEEK]}
+          view={currentView}
+          onView={setCurrentView}
           step={30} // 30-minute intervals
           timeslots={2} // 2 slots per hour (30 minutes each)
           selectable
@@ -176,40 +198,74 @@ export default function CalendarView({
           components={{
             toolbar: (props) => {
               const currentDate = moment(props.date);
+              const isDayView = props.view === Views.DAY;
+              const navigationUnit = isDayView ? 'day' : 'week';
               const canNavigateNext =
                 userRole === 'neighbor'
-                  ? currentDate.clone().add(1, 'week').isBefore(maxDate)
+                  ? currentDate.clone().add(1, navigationUnit).isBefore(maxDate)
                   : true; // Trainers/admins can navigate freely
 
               return (
-                <div className="flex justify-between items-center mb-4 p-4 bg-white border-b">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {currentDate.format('MMMM YYYY')}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 p-4 bg-white border-b gap-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                    {isDayView
+                      ? currentDate.format('dddd, MMMM Do, YYYY')
+                      : currentDate.format('MMMM YYYY')}
                   </h2>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => props.onNavigate('PREV')}
-                      className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={() => props.onNavigate('TODAY')}
-                      className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
-                    >
-                      Today
-                    </button>
-                    <button
-                      onClick={() => props.onNavigate('NEXT')}
-                      disabled={!canNavigateNext}
-                      className={`px-3 py-1 text-sm rounded text-gray-700 ${
-                        canNavigateNext
-                          ? 'bg-gray-100 hover:bg-gray-200'
-                          : 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                      }`}
-                    >
-                      Next
-                    </button>
+
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {/* View switcher - only show on larger screens */}
+                    {!isMobile && (
+                      <div className="flex bg-gray-100 rounded p-1">
+                        <button
+                          onClick={() => props.onView(Views.DAY)}
+                          className={`px-3 py-1 text-xs rounded ${
+                            props.view === Views.DAY
+                              ? 'bg-white text-gray-900 shadow-sm'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
+                        >
+                          Day
+                        </button>
+                        <button
+                          onClick={() => props.onView(Views.WEEK)}
+                          className={`px-3 py-1 text-xs rounded ${
+                            props.view === Views.WEEK
+                              ? 'bg-white text-gray-900 shadow-sm'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
+                        >
+                          Week
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Navigation buttons */}
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => props.onNavigate('PREV')}
+                        className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+                      >
+                        {isDayView ? '←' : 'Previous'}
+                      </button>
+                      <button
+                        onClick={() => props.onNavigate('TODAY')}
+                        className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                      >
+                        Today
+                      </button>
+                      <button
+                        onClick={() => props.onNavigate('NEXT')}
+                        disabled={!canNavigateNext}
+                        className={`px-3 py-1 text-sm rounded text-gray-700 ${
+                          canNavigateNext
+                            ? 'bg-gray-100 hover:bg-gray-200'
+                            : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        {isDayView ? '→' : 'Next'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
