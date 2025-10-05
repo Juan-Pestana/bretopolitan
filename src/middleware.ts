@@ -59,12 +59,18 @@ export async function middleware(req: NextRequest) {
   }
 
   // If user is authenticated and trying to access login/signup pages
+  // But only redirect if they don't have a redirectTo parameter (to avoid conflicts with client-side redirects)
   if (session && (pathname === '/login' || pathname === '/sign-up')) {
-    console.log('Redirecting authenticated user away from auth pages');
-    // Redirect to dashboard or the originally intended destination
-    const redirectTo =
-      req.nextUrl.searchParams.get('redirectTo') || '/dashboard';
-    return NextResponse.redirect(new URL(redirectTo, req.url));
+    const hasRedirectTo = req.nextUrl.searchParams.has('redirectTo');
+    if (!hasRedirectTo) {
+      console.log('Redirecting authenticated user away from auth pages');
+      // Redirect to dashboard
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    } else {
+      console.log(
+        'Authenticated user on auth page with redirectTo - allowing client-side redirect'
+      );
+    }
   }
 
   // If user is authenticated and on the home page, redirect to dashboard
