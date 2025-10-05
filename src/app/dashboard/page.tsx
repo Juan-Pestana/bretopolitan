@@ -4,12 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import CalendarView, { CalendarEvent } from '@/components/CalendarView';
+import BookingModal from '@/components/BookingModal';
 import moment from 'moment';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [selectedStartTime, setSelectedStartTime] = useState<Date | null>(null);
 
   // Generate sample events for demonstration
   useEffect(() => {
@@ -59,13 +62,39 @@ export default function DashboardPage() {
     slots: Date[];
   }) => {
     console.log('Selected slot:', slotInfo);
-    // TODO: Open booking modal
+    setSelectedStartTime(slotInfo.start);
+    setIsBookingModalOpen(true);
   };
 
   // Handle event selection
   const handleSelectEvent = (event: CalendarEvent) => {
     console.log('Selected event:', event);
     // TODO: Show event details or allow editing
+  };
+
+  // Handle booking confirmation
+  const handleBookingConfirm = async (booking: {
+    start: Date;
+    end: Date;
+    duration: number;
+  }) => {
+    console.log('Booking confirmed:', booking);
+
+    // Add the new booking to the calendar immediately
+    const newEvent: CalendarEvent = {
+      id: `booking-${Date.now()}`,
+      title: 'My Workout',
+      start: booking.start,
+      end: booking.end,
+      resource: {
+        type: 'own-booking',
+        userId: user?.id,
+      },
+    };
+    setEvents([...events, newEvent]);
+
+    // Optionally, refetch bookings from API to ensure sync
+    // await fetchBookings();
   };
 
   // Redirect to login if no user is authenticated
@@ -205,6 +234,15 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Booking Modal */}
+        <BookingModal
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+          startTime={selectedStartTime}
+          userRole={user.role}
+          onConfirm={handleBookingConfirm}
+        />
       </div>
     </div>
   );

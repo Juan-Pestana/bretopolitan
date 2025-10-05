@@ -1,0 +1,258 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import moment from 'moment';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+
+interface BookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  startTime: Date | null;
+  userRole: 'neighbor' | 'trainer' | 'admin';
+  onConfirm?: (booking: { start: Date; end: Date; duration: number }) => void;
+}
+
+export default function BookingModal({
+  isOpen,
+  onClose,
+  startTime,
+  userRole,
+  onConfirm,
+}: BookingModalProps) {
+  const [duration, setDuration] = useState<number>(60); // Default 60 minutes
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [validationError, setValidationError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string>('');
+
+  // Calculate end time whenever start time or duration changes
+  useEffect(() => {
+    if (startTime) {
+      const calculatedEndTime = moment(startTime)
+        .add(duration, 'minutes')
+        .toDate();
+      setEndTime(calculatedEndTime);
+      validateBooking(startTime, calculatedEndTime);
+    }
+  }, [startTime, duration]);
+
+  const validateBooking = (start: Date, end: Date) => {
+    setValidationError('');
+
+    // Check if booking is in the past
+    if (moment(start).isBefore(moment())) {
+      setValidationError('Cannot book slots in the past.');
+      return false;
+    }
+
+    // Check 7-day limit for neighbors
+    if (userRole === 'neighbor') {
+      const maxDate = moment().add(7, 'days').endOf('day');
+      if (moment(start).isAfter(maxDate)) {
+        setValidationError('Neighbors can only book up to 7 days in advance.');
+        return false;
+      }
+    }
+
+    // Check if booking stays within gym hours (6:00 AM - 10:00 PM)
+    const startHour = moment(start).hour();
+    const startMinute = moment(start).minute();
+    const endHour = moment(end).hour();
+    const endMinute = moment(end).minute();
+
+    const startTimeInMinutes = startHour * 60 + startMinute;
+    const endTimeInMinutes = endHour * 60 + endMinute;
+    const gymOpenTime = 6 * 60; // 6:00 AM in minutes
+    const gymCloseTime = 22 * 60; // 10:00 PM in minutes
+
+    if (startTimeInMinutes < gymOpenTime) {
+      setValidationError('Gym opens at 6:00 AM.');
+      return false;
+    }
+
+    if (endTimeInMinutes > gymCloseTime) {
+      setValidationError('Booking extends past gym closing time (10:00 PM).');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleConfirm = async () => {
+    if (!startTime || !endTime) return;
+
+    // Clear previous API errors
+    setApiError('');
+
+    // Run client-side validation first
+    if (!validateBooking(startTime, endTime)) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Call API to create booking
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          duration,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle API errors
+        setApiError(data.error || 'Failed to create booking');
+        setIsLoading(false);
+        return;
+      }
+
+      // Success! Call the onConfirm callback
+      if (onConfirm) {
+        onConfirm({
+          start: startTime,
+          end: endTime,
+          duration,
+        });
+      }
+
+      // Close modal
+      handleClose();
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      setApiError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setValidationError('');
+    setApiError('');
+    setDuration(60);
+    setIsLoading(false);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Book Gym Slot</DialogTitle>
+          <DialogDescription>
+            Select your preferred duration for this gym session.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          {/* Start Time Display */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label
+              htmlFor="start-time"
+              className="text-right text-sm font-medium"
+            >
+              Start Time
+            </label>
+            <div className="col-span-3 text-sm text-gray-700">
+              {startTime
+                ? moment(startTime).format('dddd, MMMM Do, YYYY [at] h:mm A')
+                : 'N/A'}
+            </div>
+          </div>
+
+          {/* Duration Selector */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label
+              htmlFor="duration"
+              className="text-right text-sm font-medium"
+            >
+              Duration
+            </label>
+            <div className="col-span-3">
+              <Select
+                value={duration.toString()}
+                onValueChange={(value) => setDuration(parseInt(value))}
+              >
+                <SelectTrigger id="duration">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">30 minutes</SelectItem>
+                  <SelectItem value="60">60 minutes (1 hour)</SelectItem>
+                  <SelectItem value="90">90 minutes (1.5 hours)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* End Time Display */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label
+              htmlFor="end-time"
+              className="text-right text-sm font-medium"
+            >
+              End Time
+            </label>
+            <div className="col-span-3 text-sm text-gray-700">
+              {endTime ? moment(endTime).format('h:mm A') : 'N/A'}
+            </div>
+          </div>
+
+          {/* Validation Error */}
+          {validationError && (
+            <div className="col-span-4 text-sm text-red-600 bg-red-50 p-3 rounded">
+              {validationError}
+            </div>
+          )}
+
+          {/* API Error */}
+          {apiError && (
+            <div className="col-span-4 text-sm text-red-600 bg-red-50 p-3 rounded">
+              {apiError}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleConfirm}
+            disabled={!!validationError || !startTime || isLoading}
+          >
+            {isLoading ? 'Creating...' : 'Confirm Booking'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
