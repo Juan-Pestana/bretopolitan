@@ -121,14 +121,16 @@ export default function DashboardPage() {
             </p>
             <div className="space-y-2 text-sm">
               <div>
-                <span className="font-medium">Email:</span> {user.email}
+                <span className="font-medium text-gray-700">Email:</span>{' '}
+                <span className="text-gray-900">{user.email}</span>
               </div>
               <div>
-                <span className="font-medium">Flat Number:</span>{' '}
-                {user.flat_number}
+                <span className="font-medium text-gray-700">Flat Number:</span>{' '}
+                <span className="text-gray-900">{user.flat_number}</span>
               </div>
               <div>
-                <span className="font-medium">Role:</span> {user.role}
+                <span className="font-medium text-gray-700">Role:</span>{' '}
+                <span className="text-gray-900">{user.role}</span>
               </div>
             </div>
           </div>

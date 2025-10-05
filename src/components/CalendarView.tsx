@@ -109,75 +109,77 @@ export default function CalendarView({
   };
 
   return (
-    <div className="h-[600px] w-full">
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        views={[Views.WEEK]}
-        view={Views.WEEK}
-        step={30} // 30-minute intervals
-        timeslots={2} // 2 slots per hour (30 minutes each)
-        min={new Date(2024, 0, 1, 6, 0)} // 6:00 AM
-        max={new Date(2024, 0, 1, 22, 0)} // 10:00 PM
-        selectable
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
-        eventPropGetter={eventStyleGetter}
-        slotPropGetter={slotStyleGetter}
-        style={{ height: '100%' }}
-        className="rbc-calendar"
-        // Customize the appearance
-        components={{
-          toolbar: (props) => (
-            <div className="flex justify-between items-center mb-4 p-4 bg-white border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {moment(props.date).format('MMMM YYYY')}
-              </h2>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => props.onNavigate('PREV')}
-                  className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => props.onNavigate('TODAY')}
-                  className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
-                >
-                  Today
-                </button>
-                <button
-                  onClick={() => props.onNavigate('NEXT')}
-                  className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          ),
-        }}
-      />
-
-      {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-4 text-sm">
+    <div className="w-full">
+      {/* Legend - moved to top */}
+      <div className="mb-4 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span>Available</span>
+          <span className="text-gray-700">Available</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span>Your Booking</span>
+          <span className="text-gray-700">Your Booking</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-gray-500 rounded"></div>
-          <span>Booked by Others</span>
+          <span className="text-gray-700">Booked by Others</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-orange-500 rounded"></div>
-          <span>Trainer Slot</span>
+          <span className="text-gray-700">Trainer Slot</span>
         </div>
+      </div>
+
+      <div className="h-[600px] w-full">
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          views={[Views.WEEK]}
+          view={Views.WEEK}
+          step={30} // 30-minute intervals
+          timeslots={2} // 2 slots per hour (30 minutes each)
+          min={new Date(2024, 0, 1, 6, 0)} // 6:00 AM
+          max={new Date(2024, 0, 1, 22, 0)} // 10:00 PM
+          selectable
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          eventPropGetter={eventStyleGetter}
+          slotPropGetter={slotStyleGetter}
+          style={{ height: '100%' }}
+          className="rbc-calendar"
+          // Customize the appearance
+          components={{
+            toolbar: (props) => (
+              <div className="flex justify-between items-center mb-4 p-4 bg-white border-b">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {moment(props.date).format('MMMM YYYY')}
+                </h2>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => props.onNavigate('PREV')}
+                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => props.onNavigate('TODAY')}
+                    className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={() => props.onNavigate('NEXT')}
+                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            ),
+          }}
+        />
       </div>
     </div>
   );

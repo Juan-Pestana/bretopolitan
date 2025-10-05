@@ -24,3 +24,27 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* React Big Calendar customizations for better text contrast */
+.rbc-header {
+  color: #374151 !important; /* text-gray-700 */
+  font-weight: 600 !important;
+}
+
+.rbc-time-view .rbc-header {
+  color: #374151 !important; /* text-gray-700 */
+  font-weight: 600 !important;
+}
+
+.rbc-time-slot {
+  color: #374151 !important; /* text-gray-700 */
+}
+
+.rbc-timeslot-group {
+  color: #374151 !important; /* text-gray-700 */
+}
+
+.rbc-label {
+  color: #374151 !important; /* text-gray-700 */
+  font-weight: 500 !important;
+}
