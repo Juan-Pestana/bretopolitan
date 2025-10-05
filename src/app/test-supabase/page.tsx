@@ -79,7 +79,7 @@ export default function TestSupabasePage() {
           </div>
         </div>
 
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-6 flex-wrap">
           <button
             onClick={testConnection}
             disabled={loading}
@@ -95,6 +95,13 @@ export default function TestSupabasePage() {
           >
             {schemaLoading ? 'Checking...' : 'Check Database Schema'}
           </button>
+
+          <a
+            href="/test-rls"
+            className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg font-medium text-center"
+          >
+            Test RLS Policies
+          </a>
         </div>
 
         {result && (
@@ -127,6 +134,10 @@ export default function TestSupabasePage() {
               Copy and paste the contents of <code>database-schema.sql</code>
             </li>
             <li>Run the SQL to create the tables</li>
+            <li>
+              Copy and paste the contents of <code>rls-policies.sql</code>
+            </li>
+            <li>Run the SQL to create RLS policies</li>
             <li>Restart the development server</li>
             <li>Click the test buttons above</li>
           </ol>
