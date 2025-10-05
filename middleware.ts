@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: req.headers,
     },
@@ -14,41 +14,13 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
+        getAll() {
+          return req.cookies.getAll();
         },
-        set(name: string, value: string, options: Record<string, unknown>) {
-          req.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: Record<string, unknown>) {
-          req.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            req.cookies.set(name, value);
+            response.cookies.set(name, value, options);
           });
         },
       },
@@ -66,6 +38,11 @@ export async function middleware(req: NextRequest) {
   // Get the current pathname
   const { pathname } = req.nextUrl;
 
+  // Debug logging
+  console.log('Middleware running for:', pathname);
+  console.log('Session exists:', !!session);
+  console.log('Session user:', session?.user?.email || 'No user');
+
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
@@ -73,6 +50,7 @@ export async function middleware(req: NextRequest) {
 
   // If user is not authenticated and trying to access a protected route
   if (!session && isProtectedRoute) {
+    console.log('Redirecting to login - no session for protected route');
     // Create a redirect URL that preserves the original destination
     const redirectUrl = new URL('/login', req.url);
     redirectUrl.searchParams.set('redirectTo', pathname);
@@ -82,6 +60,7 @@ export async function middleware(req: NextRequest) {
 
   // If user is authenticated and trying to access login/signup pages
   if (session && (pathname === '/login' || pathname === '/sign-up')) {
+    console.log('Redirecting authenticated user away from auth pages');
     // Redirect to dashboard or the originally intended destination
     const redirectTo =
       req.nextUrl.searchParams.get('redirectTo') || '/dashboard';
@@ -90,6 +69,7 @@ export async function middleware(req: NextRequest) {
 
   // If user is authenticated and on the home page, redirect to dashboard
   if (session && pathname === '/') {
+    console.log('Redirecting authenticated user from home to dashboard');
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
