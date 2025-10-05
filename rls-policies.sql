@@ -26,7 +26,7 @@ CREATE POLICY "Users can insert own profile" ON profiles
 CREATE POLICY "Admins can view all profiles" ON profiles
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'admin'
     )
   );
@@ -35,13 +35,13 @@ CREATE POLICY "Admins can view all profiles" ON profiles
 CREATE POLICY "Admins can update any profile" ON profiles
   FOR UPDATE USING (
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'admin'
     )
   )
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'admin'
     )
   );
@@ -50,7 +50,7 @@ CREATE POLICY "Admins can update any profile" ON profiles
 CREATE POLICY "Admins can insert profiles" ON profiles
   FOR INSERT WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'admin'
     )
   );
@@ -80,13 +80,13 @@ CREATE POLICY "Users can delete own bookings" ON bookings
 CREATE POLICY "Admins can manage all bookings" ON bookings
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'admin'
     )
   )
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'admin'
     )
   );
@@ -96,7 +96,7 @@ CREATE POLICY "Trainers can delete own bookings" ON bookings
   FOR DELETE USING (
     auth.uid() = user_id AND
     EXISTS (
-      SELECT 1 FROM profiles 
+      SELECT 1 FROM profiles
       WHERE id = auth.uid() AND role = 'trainer'
     )
   );
@@ -110,7 +110,7 @@ CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM profiles 
+    SELECT 1 FROM profiles
     WHERE id = auth.uid() AND role = 'admin'
   );
 END;
@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION is_trainer()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM profiles 
+    SELECT 1 FROM profiles
     WHERE id = auth.uid() AND role = 'trainer'
   );
 END;
@@ -132,7 +132,7 @@ CREATE OR REPLACE FUNCTION is_neighbor()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM profiles 
+    SELECT 1 FROM profiles
     WHERE id = auth.uid() AND role = 'neighbor'
   );
 END;
@@ -143,7 +143,7 @@ CREATE OR REPLACE FUNCTION get_user_role()
 RETURNS TEXT AS $$
 BEGIN
   RETURN (
-    SELECT role FROM profiles 
+    SELECT role FROM profiles
     WHERE id = auth.uid()
   );
 END;
@@ -163,7 +163,7 @@ RETURNS TABLE (
 BEGIN
   -- Test 1: Check if RLS is enabled
   RETURN QUERY
-  SELECT 
+  SELECT
     'RLS Enabled on profiles'::TEXT,
     CASE WHEN EXISTS (
       SELECT 1 FROM pg_class c
@@ -175,7 +175,7 @@ BEGIN
 
   -- Test 2: Check if RLS is enabled on bookings
   RETURN QUERY
-  SELECT 
+  SELECT
     'RLS Enabled on bookings'::TEXT,
     CASE WHEN EXISTS (
       SELECT 1 FROM pg_class c
@@ -187,24 +187,24 @@ BEGIN
 
   -- Test 3: Count policies on profiles
   RETURN QUERY
-  SELECT 
+  SELECT
     'Profiles policies count'::TEXT,
     (SELECT COUNT(*)::TEXT FROM pg_policies WHERE tablename = 'profiles'),
     'Number of RLS policies on profiles table'::TEXT;
 
   -- Test 4: Count policies on bookings
   RETURN QUERY
-  SELECT 
+  SELECT
     'Bookings policies count'::TEXT,
     (SELECT COUNT(*)::TEXT FROM pg_policies WHERE tablename = 'bookings'),
     'Number of RLS policies on bookings table'::TEXT;
 
   -- Test 5: Check helper functions exist
   RETURN QUERY
-  SELECT 
+  SELECT
     'Helper functions exist'::TEXT,
     CASE WHEN EXISTS (
-      SELECT 1 FROM pg_proc 
+      SELECT 1 FROM pg_proc
       WHERE proname IN ('is_admin', 'is_trainer', 'is_neighbor', 'get_user_role')
     ) THEN 'PASS' ELSE 'FAIL' END,
     'All helper functions should be created'::TEXT;
