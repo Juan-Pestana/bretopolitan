@@ -3,14 +3,14 @@
 -- but this violates the unique constraint
 
 -- First, let's check what flat numbers exist
-SELECT flat_number, COUNT(*) as count 
-FROM profiles 
-GROUP BY flat_number 
+SELECT flat_number, COUNT(*) as count
+FROM profiles
+GROUP BY flat_number
 ORDER BY count DESC;
 
 -- Update any 'TBD' flat numbers to unique values
-UPDATE profiles 
-SET flat_number = 'TBD-' || id::text 
+UPDATE profiles
+SET flat_number = 'TBD-' || id::text
 WHERE flat_number = 'TBD';
 
 -- Now let's fix the trigger to not insert 'TBD' by default
@@ -41,10 +41,10 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Test the fix by checking the trigger function
-SELECT 
+SELECT
   p.proname as function_name,
   p.prosrc as function_source
 FROM pg_proc p
 JOIN pg_namespace n ON p.pronamespace = n.oid
-WHERE n.nspname = 'public' 
+WHERE n.nspname = 'public'
 AND p.proname = 'handle_new_user';

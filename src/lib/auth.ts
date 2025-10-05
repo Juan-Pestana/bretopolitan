@@ -24,19 +24,49 @@ export async function signUp({
       };
     }
 
-    // Update the profile with flat number
-    const { data: profileData, error: profileError } = await supabase
+    // Wait a moment for the trigger to create the profile
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Try to get the profile created by trigger
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (profileError) {
+      // If profile doesn't exist, create it manually
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email: authData.user.email,
+          flat_number: flat_number,
+          role: 'neighbor',
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        return { user: null, error: { message: 'Failed to create profile' } };
+      }
+
+      return { user: newProfile, error: null };
+    }
+
+    // Profile exists, update it with the provided flat number
+    const { data: updatedProfile, error: updateError } = await supabase
       .from('profiles')
       .update({ flat_number })
       .eq('id', authData.user.id)
       .select()
       .single();
 
-    if (profileError) {
+    if (updateError) {
       return { user: null, error: { message: 'Failed to update profile' } };
     }
 
-    return { user: profileData, error: null };
+    return { user: updatedProfile, error: null };
   } catch (error) {
     return {
       user: null,

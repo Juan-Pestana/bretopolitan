@@ -134,10 +134,7 @@ export default function FixFlatNumberPage() {
           <h3 className="font-semibold text-green-800 mb-2">After Fix:</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-green-700">
             <li>Signup should work without constraint violations</li>
-            <li>
-              New users will get unique flat numbers like &apos;TBD-{user - id}
-              &apos;
-            </li>
+            dddd
             <li>Users can update their flat number in their profile</li>
             <li>The trigger will work correctly for future signups</li>
           </ul>

@@ -27,8 +27,8 @@ export async function POST() {
     // Apply the fix
     const fixSQL = `
 -- Update any 'TBD' flat numbers to unique values
-UPDATE profiles 
-SET flat_number = 'TBD-' || id::text 
+UPDATE profiles
+SET flat_number = 'TBD-' || id::text
 WHERE flat_number = 'TBD';
 
 -- Make flat_number nullable to avoid constraint issues
