@@ -30,6 +30,7 @@ export async function middleware(req: NextRequest) {
   // Get the current session
   const {
     data: { session },
+    error,
   } = await supabase.auth.getSession();
 
   // Define protected routes that require authentication
@@ -40,8 +41,11 @@ export async function middleware(req: NextRequest) {
 
   // Debug logging
   console.log('Middleware running for:', pathname);
+  console.log('All cookies:', req.cookies.getAll());
   console.log('Session exists:', !!session);
   console.log('Session user:', session?.user?.email || 'No user');
+  console.log('Session data:', session);
+  console.log('Session error:', error);
 
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
