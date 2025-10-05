@@ -27,7 +27,7 @@ export async function signUp({
     // Wait a moment for the trigger to create the profile
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Try to get the profile created by trigger
+    // Get the profile (created by trigger or manually)
     const { error: profileError } = await supabase
       .from('profiles')
       .select('*')
