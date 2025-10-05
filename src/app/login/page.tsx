@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from '@/lib/auth';
 import { LoginData } from '@/types/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [formData, setFormData] = useState<LoginData>({
     email: '',
     password: '',
@@ -36,6 +38,8 @@ export default function LoginPage() {
     }
 
     if (user) {
+      // Refresh the auth context to update the user state
+      await refreshUser();
       // Redirect to dashboard after successful login
       router.push('/dashboard');
     }

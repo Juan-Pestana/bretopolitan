@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signUp } from '@/lib/auth';
 import { SignUpData } from '@/types/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [formData, setFormData] = useState<SignUpData>({
     email: '',
     password: '',
@@ -45,6 +47,8 @@ export default function SignUpPage() {
 
     if (user) {
       setSuccess(true);
+      // Refresh the auth context to update the user state
+      await refreshUser();
       // Redirect to dashboard after successful signup
       setTimeout(() => {
         router.push('/dashboard');
