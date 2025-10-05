@@ -8,12 +8,12 @@ export async function GET() {
       'exec_sql',
       {
         sql: `
-          SELECT 
+          SELECT
             p.proname as function_name,
             p.prosrc as function_source
           FROM pg_proc p
           JOIN pg_namespace n ON p.pronamespace = n.oid
-          WHERE n.nspname = 'public' 
+          WHERE n.nspname = 'public'
           AND p.proname = 'handle_new_user'
         `,
       }
@@ -35,14 +35,14 @@ export async function GET() {
       'exec_sql',
       {
         sql: `
-          SELECT 
+          SELECT
             t.tgname as trigger_name,
             t.tgenabled as trigger_enabled,
             c.relname as table_name
           FROM pg_trigger t
           JOIN pg_class c ON t.tgrelid = c.oid
           JOIN pg_namespace n ON c.relnamespace = n.oid
-          WHERE n.nspname = 'public' 
+          WHERE n.nspname = 'public'
           AND c.relname = 'users'
           AND t.tgname = 'on_auth_user_created'
         `,
