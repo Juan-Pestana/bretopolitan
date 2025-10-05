@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from '@/lib/auth';
 import { LoginData } from '@/types/auth';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { refreshUser } = useAuth();
   const [formData, setFormData] = useState<LoginData>({
     email: '',
@@ -16,6 +17,9 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get the redirect destination from URL params
+  const redirectTo = searchParams.get('redirectTo') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +44,8 @@ export default function LoginPage() {
     if (user) {
       // Refresh the auth context to update the user state
       await refreshUser();
-      // Redirect to dashboard after successful login
-      router.push('/dashboard');
+      // Redirect to the intended destination or dashboard
+      router.push(redirectTo);
     }
   };
 

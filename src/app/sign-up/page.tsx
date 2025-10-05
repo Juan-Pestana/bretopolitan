@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signUp } from '@/lib/auth';
 import { SignUpData } from '@/types/auth';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { refreshUser } = useAuth();
   const [formData, setFormData] = useState<SignUpData>({
     email: '',
@@ -18,6 +19,9 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Get the redirect destination from URL params
+  const redirectTo = searchParams.get('redirectTo') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +53,9 @@ export default function SignUpPage() {
       setSuccess(true);
       // Refresh the auth context to update the user state
       await refreshUser();
-      // Redirect to dashboard after successful signup
+      // Redirect to the intended destination or dashboard after successful signup
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push(redirectTo);
       }, 2000);
     }
   };
