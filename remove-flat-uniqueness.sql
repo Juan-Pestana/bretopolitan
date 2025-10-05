@@ -8,11 +8,11 @@ ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_flat_number_key;
 DROP INDEX IF EXISTS idx_profiles_flat_number;
 
 -- Verify the constraint is removed
-SELECT 
+SELECT
     conname as constraint_name,
     contype as constraint_type
-FROM pg_constraint 
-WHERE conrelid = 'profiles'::regclass 
+FROM pg_constraint
+WHERE conrelid = 'profiles'::regclass
 AND conname LIKE '%flat_number%';
 
 -- Show current table structure

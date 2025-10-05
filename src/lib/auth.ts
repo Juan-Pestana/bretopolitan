@@ -24,10 +24,26 @@ export async function signUp({
       };
     }
 
+    // For email confirmation, return the user data without profile operations
+    // The profile will be created by the trigger when the user confirms their email
+    if (!authData.session) {
+      return {
+        user: {
+          id: authData.user.id,
+          email: authData.user.email || '',
+          flat_number: flat_number,
+          role: 'neighbor',
+          created_at: new Date().toISOString(),
+        },
+        error: null,
+      };
+    }
+
+    // If we have a session (email confirmation disabled), proceed with profile operations
     // Wait a moment for the trigger to create the profile
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Get the profile (created by trigger or manually)
+    // Get the profile (created by trigger)
     const { error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -166,7 +182,26 @@ export async function getCurrentUser(): Promise<{
       .single();
 
     if (profileError) {
-      return { user: null, error: { message: 'Failed to load user profile' } };
+      // If profile doesn't exist, create it (this can happen if the trigger failed)
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authUser.id,
+          email: authUser.email,
+          flat_number: 'TBD-' + authUser.id,
+          role: 'neighbor',
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        return {
+          user: null,
+          error: { message: 'Failed to create user profile' },
+        };
+      }
+
+      return { user: newProfile, error: null };
     }
 
     return { user: profileData, error: null };

@@ -3,7 +3,7 @@ export interface User {
   email: string;
   flat_number: string;
   role: 'neighbor' | 'trainer' | 'admin';
-  created_at: string;
+  created_at?: string;
 }
 
 export interface AuthError {
