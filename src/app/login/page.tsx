@@ -28,7 +28,7 @@ export default function LoginPage() {
 
     // Basic validation
     if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      setError('Por favor complete todos los campos');
       setLoading(false);
       return;
     }
@@ -61,10 +61,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Sign in to your account
+            Inicia sesión en tu cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Access the gym scheduling system
+            Accede al sistema de reservas del gimnasio
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -74,7 +74,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Correo electrónico
               </label>
               <input
                 id="email"
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
+                placeholder="Ingresa tu correo electrónico"
               />
             </div>
             <div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Contraseña
               </label>
               <input
                 id="password"
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your password"
+                placeholder="Ingresa tu contraseña"
               />
             </div>
           </div>
@@ -121,18 +121,18 @@ export default function LoginPage() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
           </div>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
+              ¿No tienes una cuenta?{' '}
               <Link
                 href="/sign-up"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Sign up here
+                Regístrate aquí
               </Link>
             </p>
           </div>

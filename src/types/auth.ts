@@ -1,7 +1,8 @@
 export interface User {
   id: string;
   email: string;
-  flat_number: string;
+  name: string;
+  flat_number?: string;
   role: 'neighbor' | 'trainer' | 'admin';
   created_at?: string;
 }
@@ -14,7 +15,7 @@ export interface AuthError {
 export interface SignUpData {
   email: string;
   password: string;
-  flat_number: string;
+  name: string;
 }
 
 export interface LoginData {

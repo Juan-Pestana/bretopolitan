@@ -36,8 +36,11 @@ export default function CalendarView({
   onSelectEvent,
   userRole = 'neighbor',
 }: CalendarViewProps) {
-  const [currentView, setCurrentView] = useState<Views>(Views.WEEK);
+  const [currentView, setCurrentView] = useState<
+    (typeof Views)[keyof typeof Views]
+  >(Views.WEEK);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // Detect screen size and set appropriate view
   useEffect(() => {
@@ -118,7 +121,9 @@ export default function CalendarView({
   const maxDate =
     userRole === 'neighbor'
       ? today.clone().add(7, 'days').endOf('day') // 7 days for neighbors
-      : today.clone().add(365, 'days').endOf('day'); // 1 year for trainers/admins
+      : userRole === 'trainer'
+        ? today.clone().add(28, 'days').endOf('day') // 4 weeks (28 days) for trainers
+        : today.clone().add(365, 'days').endOf('day'); // 1 year for admins
 
   // Handle slot selection with date validation
   const handleSelectSlot = (slotInfo: {
@@ -129,13 +134,19 @@ export default function CalendarView({
     const slotDate = moment(slotInfo.start);
 
     // Check if slot is within allowed date range
-    if (userRole === 'neighbor' && slotDate.isAfter(maxDate)) {
-      alert('You can only book gym slots up to 7 days in advance.');
+    if (slotDate.isAfter(maxDate)) {
+      const message =
+        userRole === 'neighbor'
+          ? 'Solo puedes reservar horarios del gimnasio hasta con 7 días de anticipación.'
+          : userRole === 'trainer'
+            ? 'Solo puedes reservar horarios del gimnasio hasta con 4 semanas de anticipación.'
+            : 'Rango de fechas inválido.';
+      alert(message);
       return;
     }
 
     if (slotDate.isBefore(today)) {
-      alert('You cannot book slots in the past.');
+      alert('No puedes reservar horarios en el pasado.');
       return;
     }
 
@@ -151,25 +162,26 @@ export default function CalendarView({
     }
   };
 
+  // Handle calendar navigation
+  const handleNavigate = (newDate: Date) => {
+    setCurrentDate(newDate);
+  };
+
   return (
     <div className="w-full">
       {/* Legend - moved to top */}
       <div className="mb-4 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span className="text-gray-700">Available</span>
-        </div>
-        <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span className="text-gray-700">Your Booking</span>
+          <span className="text-gray-700">Tu Reserva</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-gray-500 rounded"></div>
-          <span className="text-gray-700">Booked by Others</span>
+          <span className="text-gray-700">Reservado por Otros</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-orange-500 rounded"></div>
-          <span className="text-gray-700">Trainer Slot</span>
+          <span className="text-gray-700">Horario de Entrenador</span>
         </div>
       </div>
 
@@ -182,6 +194,8 @@ export default function CalendarView({
           views={[Views.DAY, Views.WEEK]}
           view={currentView}
           onView={setCurrentView}
+          date={currentDate}
+          onNavigate={handleNavigate}
           step={30} // 30-minute intervals
           timeslots={2} // 2 slots per hour (30 minutes each)
           selectable
@@ -204,10 +218,10 @@ export default function CalendarView({
               const currentDate = moment(props.date);
               const isDayView = props.view === Views.DAY;
               const navigationUnit = isDayView ? 'day' : 'week';
-              const canNavigateNext =
-                userRole === 'neighbor'
-                  ? currentDate.clone().add(1, navigationUnit).isBefore(maxDate)
-                  : true; // Trainers/admins can navigate freely
+              const canNavigateNext = currentDate
+                .clone()
+                .add(1, navigationUnit)
+                .isSameOrBefore(maxDate);
 
               return (
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 p-4 bg-white border-b gap-4">
@@ -229,7 +243,7 @@ export default function CalendarView({
                               : 'text-gray-600 hover:text-gray-900'
                           }`}
                         >
-                          Day
+                          Día
                         </button>
                         <button
                           onClick={() => props.onView(Views.WEEK)}
@@ -239,7 +253,7 @@ export default function CalendarView({
                               : 'text-gray-600 hover:text-gray-900'
                           }`}
                         >
-                          Week
+                          Semana
                         </button>
                       </div>
                     )}
@@ -250,13 +264,13 @@ export default function CalendarView({
                         onClick={() => props.onNavigate('PREV')}
                         className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
                       >
-                        {isDayView ? '←' : 'Previous'}
+                        {isDayView ? '←' : 'Anterior'}
                       </button>
                       <button
                         onClick={() => props.onNavigate('TODAY')}
                         className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
                       >
-                        Today
+                        Hoy
                       </button>
                       <button
                         onClick={() => props.onNavigate('NEXT')}
@@ -267,7 +281,7 @@ export default function CalendarView({
                             : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                         }`}
                       >
-                        {isDayView ? '→' : 'Next'}
+                        {isDayView ? '→' : 'Siguiente'}
                       </button>
                     </div>
                   </div>

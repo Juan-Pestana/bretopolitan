@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
 
     if (!startTime) {
       return NextResponse.json(
-        { error: 'Start time is required' },
+        { error: 'La hora de inicio es requerida' },
         { status: 400 }
       );
     }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           valid: false,
-          error: 'You cannot book slots in the past',
+          error: 'No puedes reservar horarios en el pasado',
         },
         { status: 400 }
       );
@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             valid: false,
-            error: 'You can only book gym slots up to 7 days in advance',
+            error:
+              'Solo puedes reservar horarios del gimnasio hasta con 7 días de anticipación',
           },
           { status: 400 }
         );
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           valid: false,
-          error: 'Booking date is too far in the future',
+          error: 'La fecha de la reserva está demasiado lejos en el futuro',
         },
         { status: 400 }
       );
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Booking validation error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

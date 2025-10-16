@@ -8,7 +8,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  flat_number TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  flat_number TEXT,
   role TEXT CHECK (role IN ('neighbor', 'trainer', 'admin')) DEFAULT 'neighbor',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -40,11 +41,12 @@ CREATE INDEX IF NOT EXISTS idx_profiles_flat_number ON profiles(flat_number);
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, flat_number, role)
+  INSERT INTO public.profiles (id, email, name, flat_number, role)
   VALUES (
     NEW.id,
     NEW.email,
     'TBD', -- Will be updated when user completes profile
+    NULL,
     'neighbor'
   );
   RETURN NEW;

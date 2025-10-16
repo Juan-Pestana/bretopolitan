@@ -39,6 +39,7 @@ export default function BookingModal({
   const [validationError, setValidationError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>('');
+  const [clientReference, setClientReference] = useState<string>('');
 
   // Calculate end time whenever start time or duration changes
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function BookingModal({
 
     // Check if booking is in the past
     if (moment(start).isBefore(moment())) {
-      setValidationError('Cannot book slots in the past.');
+      setValidationError('No se pueden reservar horarios en el pasado.');
       return false;
     }
 
@@ -64,7 +65,9 @@ export default function BookingModal({
     if (userRole === 'neighbor') {
       const maxDate = moment().add(7, 'days').endOf('day');
       if (moment(start).isAfter(maxDate)) {
-        setValidationError('Neighbors can only book up to 7 days in advance.');
+        setValidationError(
+          'Los vecinos solo pueden reservar hasta con 7 días de anticipación.'
+        );
         return false;
       }
     }
@@ -81,12 +84,14 @@ export default function BookingModal({
     const gymCloseTime = 22 * 60; // 10:00 PM in minutes
 
     if (startTimeInMinutes < gymOpenTime) {
-      setValidationError('Gym opens at 6:00 AM.');
+      setValidationError('El gimnasio abre a las 6:00 AM.');
       return false;
     }
 
     if (endTimeInMinutes > gymCloseTime) {
-      setValidationError('Booking extends past gym closing time (10:00 PM).');
+      setValidationError(
+        'La reserva se extiende más allá del horario de cierre del gimnasio (10:00 PM).'
+      );
       return false;
     }
 
@@ -117,6 +122,7 @@ export default function BookingModal({
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
           duration,
+          client_reference: clientReference.trim() || undefined,
         }),
       });
 
@@ -142,7 +148,9 @@ export default function BookingModal({
       handleClose();
     } catch (error) {
       console.error('Error creating booking:', error);
-      setApiError('Network error. Please check your connection and try again.');
+      setApiError(
+        'Error de red. Por favor verifica tu conexión e intenta de nuevo.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -153,6 +161,7 @@ export default function BookingModal({
     setApiError('');
     setDuration(60);
     setIsLoading(false);
+    setClientReference('');
     onClose();
   };
 
@@ -160,9 +169,9 @@ export default function BookingModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Book Gym Slot</DialogTitle>
+          <DialogTitle>Reservar Horario del Gimnasio</DialogTitle>
           <DialogDescription>
-            Select your preferred duration for this gym session.
+            Selecciona tu duración preferida para esta sesión de gimnasio.
           </DialogDescription>
         </DialogHeader>
 
@@ -173,11 +182,11 @@ export default function BookingModal({
               htmlFor="start-time"
               className="text-right text-sm font-medium"
             >
-              Start Time
+              Hora Inicio
             </label>
             <div className="col-span-3 text-sm text-gray-700">
               {startTime
-                ? moment(startTime).format('dddd, MMMM Do, YYYY [at] h:mm A')
+                ? moment(startTime).format('dddd, MMMM Do, YYYY [a las] h:mm A')
                 : 'N/A'}
             </div>
           </div>
@@ -188,7 +197,7 @@ export default function BookingModal({
               htmlFor="duration"
               className="text-right text-sm font-medium"
             >
-              Duration
+              Duración
             </label>
             <div className="col-span-3">
               <Select
@@ -196,12 +205,12 @@ export default function BookingModal({
                 onValueChange={(value) => setDuration(parseInt(value))}
               >
                 <SelectTrigger id="duration">
-                  <SelectValue placeholder="Select duration" />
+                  <SelectValue placeholder="Seleccionar duración" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                  <SelectItem value="60">60 minutes (1 hour)</SelectItem>
-                  <SelectItem value="90">90 minutes (1.5 hours)</SelectItem>
+                  <SelectItem value="30">30 minutos</SelectItem>
+                  <SelectItem value="60">60 minutos (1 hora)</SelectItem>
+                  <SelectItem value="90">90 minutos (1.5 horas)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -213,12 +222,38 @@ export default function BookingModal({
               htmlFor="end-time"
               className="text-right text-sm font-medium"
             >
-              End Time
+              Hora Fin
             </label>
             <div className="col-span-3 text-sm text-gray-700">
               {endTime ? moment(endTime).format('h:mm A') : 'N/A'}
             </div>
           </div>
+
+          {/* Client Reference (Trainers only) */}
+          {userRole === 'trainer' && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="client-reference"
+                className="text-right text-sm font-medium"
+              >
+                Cliente
+              </label>
+              <div className="col-span-3">
+                <input
+                  type="text"
+                  id="client-reference"
+                  placeholder="Nombre del cliente (opcional)"
+                  value={clientReference}
+                  onChange={(e) => setClientReference(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  maxLength={100}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Opcional: Agrega una referencia a tu cliente
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Validation Error */}
           {validationError && (
@@ -242,14 +277,14 @@ export default function BookingModal({
             onClick={handleClose}
             disabled={isLoading}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             type="button"
             onClick={handleConfirm}
             disabled={!!validationError || !startTime || isLoading}
           >
-            {isLoading ? 'Creating...' : 'Confirm Booking'}
+            {isLoading ? 'Creando...' : 'Confirmar Reserva'}
           </Button>
         </DialogFooter>
       </DialogContent>

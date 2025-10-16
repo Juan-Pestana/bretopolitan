@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
@@ -18,9 +19,11 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gym Scheduler
-              </h1>
+              <Link href="/">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Bretopolitan
+                </h1>
+              </Link>
             </div>
             <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
           </div>
@@ -35,22 +38,24 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gym Scheduler
-              </h1>
+              <Link href="/">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Bretopolitan
+                </h1>
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push('/login')}
                 className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
-                Sign In
+                Iniciar Sesión
               </button>
               <button
                 onClick={() => router.push('/sign-up')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
-                Sign Up
+                Registrarse
               </button>
             </div>
           </div>
@@ -64,16 +69,32 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Gym Scheduler</h1>
+            <Link href="/">
+              <h1 className="text-2xl font-bold text-gray-900">Bretopolitan</h1>
+            </Link>
           </div>
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer"
+            >
+              Mi calendario
+            </button>
+            {user.role === 'admin' && (
+              <button
+                onClick={() => router.push('/admin')}
+                className="text-blue-700 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Panel de Admin
+              </button>
+            )}
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-600">
-                {user.flat_number} • {user.role}
+                {user.name} • {user.role}
               </span>
               <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
-                  {user.email.charAt(0).toUpperCase()}
+                  {user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
@@ -81,7 +102,7 @@ export default function Header() {
               onClick={handleLogout}
               className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Logout
+              Cerrar Sesión
             </button>
           </div>
         </div>

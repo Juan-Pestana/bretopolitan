@@ -4,7 +4,7 @@ import { User, SignUpData, LoginData, AuthError } from '@/types/auth';
 export async function signUp({
   email,
   password,
-  flat_number,
+  name,
 }: SignUpData): Promise<{ user: User | null; error: AuthError | null }> {
   try {
     // Sign up the user with Supabase Auth
@@ -31,7 +31,7 @@ export async function signUp({
         user: {
           id: authData.user.id,
           email: authData.user.email || '',
-          flat_number: flat_number,
+          name: name,
           role: 'neighbor',
           created_at: new Date().toISOString(),
         },
@@ -57,7 +57,7 @@ export async function signUp({
         .insert({
           id: authData.user.id,
           email: authData.user.email,
-          flat_number: flat_number,
+          name: name,
           role: 'neighbor',
         })
         .select()
@@ -70,10 +70,10 @@ export async function signUp({
       return { user: newProfile, error: null };
     }
 
-    // Profile exists, update it with the provided flat number
+    // Profile exists, update it with the provided name
     const { data: updatedProfile, error: updateError } = await supabase
       .from('profiles')
-      .update({ flat_number })
+      .update({ name })
       .eq('id', authData.user.id)
       .select()
       .single();
@@ -188,7 +188,7 @@ export async function getCurrentUser(): Promise<{
         .insert({
           id: authUser.id,
           email: authUser.email,
-          flat_number: 'TBD-' + authUser.id,
+          name: 'User',
           role: 'neighbor',
         })
         .select()

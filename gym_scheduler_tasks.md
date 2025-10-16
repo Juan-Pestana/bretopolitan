@@ -319,50 +319,40 @@ CREATE INDEX idx_bookings_recurring_parent ON bookings(recurring_parent_id);
 
 ---
 
-### Task 4.2: Build Trainer Schedule Creation Form
+### Task 4.2: Trainer Booking Functionality (REVISED)
 
-**Description**: Create a form for admins to set up recurring weekly slots for trainers.
+**Description**: Trainers can book their own gym time slots, similar to neighbors but with relaxed restrictions.
 
-**User Story**: As an admin, I want to create recurring weekly gym slots for trainers so that they can consistently train their clients.
+**User Story**: As a trainer, I want to book gym slots for my training sessions so that I can schedule time with my clients.
 
-**Form Fields**:
+**Booking Rules for Trainers**:
 
-- Select trainer (dropdown of users with role 'trainer')
-- Day(s) of week (checkboxes: Mon-Sun)
-- Start time (dropdown: 00:00, 00:30, 01:00, ..., 23:30)
-- End time (dropdown)
-- Number of weeks (1-12)
+- ✅ Can book up to 4 weeks (28 days) in advance (vs 7 days for neighbors)
+- ✅ Can book multiple slots per day (no daily limit like neighbors)
+- ✅ Maximum 90 minutes per booking (same as neighbors)
+- ✅ Must book in 30-minute increments (:00 or :30)
+- ✅ Gym hours: 6:00 AM - 10:00 PM
+- ✅ No overlapping bookings (same as all users)
 
 **Acceptance Criteria**:
 
-- Form renders with all fields
-- Validation: end time after start time, at least one day selected, valid trainer
-- Preview of what will be created (e.g., "Will create 24 bookings over 12 weeks")
-- Submit button
+- ✅ Trainers can access the booking calendar
+- ✅ Trainers can book slots within 4-week window
+- ✅ Trainers can create multiple bookings per day
+- ✅ Calendar navigation limited to 4-week range for trainers
+- ✅ Validation enforces trainer-specific rules
+
+**Status**: COMPLETED - Implemented in API validation and CalendarView component
 
 ---
 
-### Task 4.3: Implement Recurring Booking Generation
+### Task 4.3: NOT APPLICABLE (REMOVED)
 
-**Description**: Create API logic to generate individual booking records for a recurring schedule.
+**Previous Description**: Implement Recurring Booking Generation
 
-**User Story**: As an admin, when I submit a trainer schedule, the system creates all individual booking instances so that the gym calendar reflects the trainer's availability.
+**Reason for Removal**: Based on the revised use case, trainers book their own time slots individually rather than having admins create recurring schedules for them. This simplifies the system and gives trainers more flexibility.
 
-**Logic**:
-
-- Create parent booking record with `is_recurring = TRUE`
-- Generate child bookings for each occurrence (up to 12 weeks)
-- Each child has `recurring_parent_id` pointing to parent
-- All bookings assigned to the selected trainer
-
-**Acceptance Criteria**:
-
-- POST endpoint `/api/admin/recurring-bookings`
-- Generates correct number of instances
-- Properly calculates dates (e.g., "every Tuesday" for 12 weeks)
-- Handles multiple days (e.g., Mon & Wed)
-- All instances visible in calendar
-- Transaction: all or nothing (rollback on error)
+If recurring bookings are needed in the future, this task can be re-implemented as an optional feature.
 
 ---
 
