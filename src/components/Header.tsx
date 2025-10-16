@@ -89,7 +89,7 @@ export default function Header() {
               </button>
             )}
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">
+              <span className="hidden md:block text-sm text-gray-600">
                 {user.name} • {user.role}
               </span>
               <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
