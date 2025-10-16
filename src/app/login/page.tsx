@@ -7,7 +7,7 @@ import { signIn } from '@/lib/auth';
 import { LoginData } from '@/types/auth';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { refreshUser } = useAuth();
@@ -140,6 +140,14 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+    </Suspense>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
     </Suspense>
   );
 }
